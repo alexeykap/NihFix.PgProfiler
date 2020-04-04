@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NihFix.PgProfiler.Sample", "NihFix.PgProfiler.Sample\NihFix.PgProfiler.Sample.csproj", "{DCE69813-88AD-41E2-B1A2-92B0A964F51E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NihFix.PgProfiler.LogProcessing", "NihFix.PgProfiler.LogProcessing\NihFix.PgProfiler.LogProcessing.csproj", "{BFD00A19-161A-4F89-9AC3-6BE51C587B7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{DCE69813-88AD-41E2-B1A2-92B0A964F51E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCE69813-88AD-41E2-B1A2-92B0A964F51E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCE69813-88AD-41E2-B1A2-92B0A964F51E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFD00A19-161A-4F89-9AC3-6BE51C587B7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFD00A19-161A-4F89-9AC3-6BE51C587B7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFD00A19-161A-4F89-9AC3-6BE51C587B7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFD00A19-161A-4F89-9AC3-6BE51C587B7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
