@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NihFix.PgProfiler.LogProcessing
 {
@@ -12,6 +14,8 @@ namespace NihFix.PgProfiler.LogProcessing
         private string _logFolderPath;
         private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly Dictionary<string, long> _streamPositionDictionary = new Dictionary<string, long>();
+
+        private CancellationTokenSource _scanTaskCancellationTokenSource=new CancellationTokenSource();
         
         /// <summary>
         /// Occurs when new data adds to log.
@@ -30,9 +34,15 @@ namespace NihFix.PgProfiler.LogProcessing
             _fileSystemWatcher.Filter = "*.log";
             _fileSystemWatcher.NotifyFilter = NotifyFilters.CreationTime |
                                               NotifyFilters.FileName |
-                                              NotifyFilters.LastWrite;
+                                              NotifyFilters.LastWrite | 
+                                              NotifyFilters.LastAccess |
+                                              NotifyFilters.Size |
+                                              NotifyFilters.Attributes |
+                                              NotifyFilters.Security |
+                                              NotifyFilters.DirectoryName;
             _fileSystemWatcher.Changed += FileSystemWatcherOnChanged;
             _fileSystemWatcher.EnableRaisingEvents = true;
+            Task.Run(() => Scan(_scanTaskCancellationTokenSource.Token), _scanTaskCancellationTokenSource.Token);
         }
 
         private void FileSystemWatcherOnChanged(object sender, FileSystemEventArgs e)
@@ -41,7 +51,7 @@ namespace NihFix.PgProfiler.LogProcessing
             fileStream.Position = GetCurrentStreamPosition(e.FullPath);
             using var streamReader = new StreamReader(fileStream);
             OnLogChange?.Invoke(this, new OnLogAddEventArgs(streamReader.ReadToEnd(), e.FullPath));
-            SaveCurrentStreamPosition(e.FullPath,fileStream.Position);
+            SaveCurrentStreamPosition(e.FullPath, fileStream.Position);
         }
 
         private long GetCurrentStreamPosition(string filePath)
@@ -57,7 +67,22 @@ namespace NihFix.PgProfiler.LogProcessing
 
         private void SaveCurrentStreamPosition(string filePath, long position)
         {
-            _streamPositionDictionary[filePath]=position;
+            _streamPositionDictionary[filePath] = position;
+        }
+
+        private void Scan(CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var files= Directory.GetFiles(_logFolderPath);
+                foreach (var file in files)
+                {
+                    File.GetCreationTime(file);
+                }
+                Thread.Sleep(TimeSpan.FromMilliseconds(100));                
+            }
+            // ReSharper disable once FunctionNeverReturns
         }
 
 
@@ -65,6 +90,7 @@ namespace NihFix.PgProfiler.LogProcessing
         public void Dispose()
         {
             _fileSystemWatcher?.Dispose();
+            _scanTaskCancellationTokenSource.Cancel();
         }
     }
 }
