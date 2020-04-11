@@ -7,7 +7,7 @@ namespace NihFix.PgProfiler.Sample
     {
         static void Main(string[] args)
         {
-            using var logReader = new LogChangeTracker(@"C:\Program Files\PostgreSQL\10\data\log");
+            using var logReader = new LogChangeTracker(@"D:\postgres\data\log");
             logReader.OnLogChange+=LogReaderOnOnLogChange;
             while (Console.ReadLine()!="q")
             {

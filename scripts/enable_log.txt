@@ -1,0 +1,3 @@
+alter system set log_statement to 'all';
+alter system set log_min_duration_statement to 0;
+alter system set log_destination to 'csvlog';

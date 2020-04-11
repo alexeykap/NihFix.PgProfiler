@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using CsvHelper;
 
 namespace NihFix.PgProfiler.LogProcessing
 {
@@ -31,7 +33,7 @@ namespace NihFix.PgProfiler.LogProcessing
             _logFolderPath = logFolderPath;
             _fileSystemWatcher = new FileSystemWatcher();
             _fileSystemWatcher.Path = logFolderPath;
-            _fileSystemWatcher.Filter = "*.log";
+            _fileSystemWatcher.Filter = "*.csv";
             _fileSystemWatcher.NotifyFilter = NotifyFilters.CreationTime |
                                               NotifyFilters.FileName |
                                               NotifyFilters.LastWrite | 
@@ -50,6 +52,10 @@ namespace NihFix.PgProfiler.LogProcessing
             using var fileStream = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             fileStream.Position = GetCurrentStreamPosition(e.FullPath);
             using var streamReader = new StreamReader(fileStream);
+            using var csvReader = new CsvReader(streamReader,CultureInfo.InvariantCulture);
+            csvReader.Configuration.HasHeaderRecord = false;
+            csvReader.Configuration.Delimiter = ",";
+            var records= csvReader.GetRecords<LogRecord>();
             OnLogChange?.Invoke(this, new OnLogAddEventArgs(streamReader.ReadToEnd(), e.FullPath));
             SaveCurrentStreamPosition(e.FullPath, fileStream.Position);
         }
@@ -75,10 +81,12 @@ namespace NihFix.PgProfiler.LogProcessing
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var files= Directory.GetFiles(_logFolderPath);
+                var files= Directory.GetFiles(_logFolderPath,"*.csv");
                 foreach (var file in files)
                 {
-                    File.GetCreationTime(file);
+                    using var fileObj = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    fileObj.Flush();
+                    Thread.Sleep(TimeSpan.FromMilliseconds(1)); 
                 }
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));                
             }
