@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NihFix.PgProfiler.LogProcessing
+namespace NihFix.PgProfiler.LogProcessing.SecondLevelInterpreter
 {
     public class LogData
     {

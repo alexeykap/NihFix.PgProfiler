@@ -55,7 +55,7 @@ namespace NihFix.PgProfiler.LogProcessing
             using var csvReader = new CsvReader(streamReader,CultureInfo.InvariantCulture);
             csvReader.Configuration.HasHeaderRecord = false;
             csvReader.Configuration.Delimiter = ",";
-            var records= csvReader.GetRecords<LogRecord>();
+            var records= csvReader.GetRecords<PostgresLogRecord>();
             OnLogChange?.Invoke(this, new OnLogAddEventArgs(streamReader.ReadToEnd(), e.FullPath));
             SaveCurrentStreamPosition(e.FullPath, fileStream.Position);
         }

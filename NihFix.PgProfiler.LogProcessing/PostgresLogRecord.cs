@@ -2,7 +2,7 @@
 
 namespace NihFix.PgProfiler.LogProcessing
 {
-    public class LogRecord
+    public class PostgresLogRecord
     {
         public string LogTime { get; set; }
         public string UserName { get; set; }
