@@ -21,6 +21,10 @@ namespace NihFix.PgProfiler.Sample
         {
             Console.WriteLine(e.FilePath);
             Console.Write(e.NewData);
+            foreach (var postgresLogRecord in e.NewData)
+            {
+                var r = postgresLogRecord;
+            }
         }
     }
 }

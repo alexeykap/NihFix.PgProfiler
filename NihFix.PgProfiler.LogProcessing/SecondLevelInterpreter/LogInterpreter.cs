@@ -77,7 +77,7 @@ namespace NihFix.PgProfiler.LogProcessing.SecondLevelInterpreter
         {
             var logData = new LogData
             {
-                //DateTime = logRecord.LogTime,
+                DateTime = DateTime.Parse( logRecord.LogTime),
                 DataBaseName = logRecord.DatabaseName
             };
             logData.SqlText = logRecord.Message.Substring(_config.QueryPrefix.Length);
@@ -86,12 +86,14 @@ namespace NihFix.PgProfiler.LogProcessing.SecondLevelInterpreter
 
         private LogData ParseDuration(PostgresLogRecord logRecord, LogData destination)
         {
-            throw new NotImplementedException();
+            destination.ExecuteDurationMs = double.Parse(logRecord.Message.Substring(_config.DurationPrefix.Length));
+            return destination;
         }
 
         private LogData ParseParams(PostgresLogRecord logRecord, LogData destination)
         {
-            throw new NotImplementedException();
+            destination.QueryParams = logRecord.Message.Substring(_config.QueryPrefix.Length);
+            return destination;
         }
     }
 }

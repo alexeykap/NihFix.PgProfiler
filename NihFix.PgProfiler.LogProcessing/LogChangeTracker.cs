@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
+using NihFix.PgProfiler.LogProcessing.SecondLevelInterpreter;
 
 namespace NihFix.PgProfiler.LogProcessing
 {
@@ -17,12 +19,14 @@ namespace NihFix.PgProfiler.LogProcessing
         private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly Dictionary<string, long> _streamPositionDictionary = new Dictionary<string, long>();
 
-        private CancellationTokenSource _scanTaskCancellationTokenSource=new CancellationTokenSource();
-        
+        private CancellationTokenSource _scanTaskCancellationTokenSource = new CancellationTokenSource();
+
         /// <summary>
         /// Occurs when new data adds to log.
         /// </summary>
         public event EventHandler<OnLogAddEventArgs> OnLogChange;
+
+        private LogInterpreter _logInterpreter;
 
         /// <summary>
         /// Ctr.
@@ -30,13 +34,14 @@ namespace NihFix.PgProfiler.LogProcessing
         /// <param name="logFolderPath">Path to folder with log files.</param>
         public LogChangeTracker(string logFolderPath)
         {
+            _logInterpreter=new LogInterpreter(new LogInterpreterConfig());
             _logFolderPath = logFolderPath;
             _fileSystemWatcher = new FileSystemWatcher();
             _fileSystemWatcher.Path = logFolderPath;
             _fileSystemWatcher.Filter = "*.csv";
             _fileSystemWatcher.NotifyFilter = NotifyFilters.CreationTime |
                                               NotifyFilters.FileName |
-                                              NotifyFilters.LastWrite | 
+                                              NotifyFilters.LastWrite |
                                               NotifyFilters.LastAccess |
                                               NotifyFilters.Size |
                                               NotifyFilters.Attributes |
@@ -52,11 +57,11 @@ namespace NihFix.PgProfiler.LogProcessing
             using var fileStream = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             fileStream.Position = GetCurrentStreamPosition(e.FullPath);
             using var streamReader = new StreamReader(fileStream);
-            using var csvReader = new CsvReader(streamReader,CultureInfo.InvariantCulture);
+            using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
             csvReader.Configuration.HasHeaderRecord = false;
             csvReader.Configuration.Delimiter = ",";
-            var records= csvReader.GetRecords<PostgresLogRecord>();
-            OnLogChange?.Invoke(this, new OnLogAddEventArgs(streamReader.ReadToEnd(), e.FullPath));
+            var records = csvReader.GetRecords<PostgresLogRecord>();
+            OnLogChange?.Invoke(this, new OnLogAddEventArgs( records, e.FullPath));
             SaveCurrentStreamPosition(e.FullPath, fileStream.Position);
         }
 
@@ -81,15 +86,17 @@ namespace NihFix.PgProfiler.LogProcessing
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var files= Directory.GetFiles(_logFolderPath,"*.csv");
+                var files = Directory.GetFiles(_logFolderPath, "*.csv");
                 foreach (var file in files)
                 {
                     using var fileObj = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     fileObj.Flush();
-                    Thread.Sleep(TimeSpan.FromMilliseconds(1)); 
+                    Thread.Sleep(TimeSpan.FromMilliseconds(1));
                 }
-                Thread.Sleep(TimeSpan.FromMilliseconds(100));                
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(100));
             }
+
             // ReSharper disable once FunctionNeverReturns
         }
 
