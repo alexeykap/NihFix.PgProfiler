@@ -12,7 +12,7 @@ namespace NihFix.PgProfiler.LogProcessing.SecondLevelInterpreter
 
         public double BindDurationMs { get; set; }
 
-        public double ExecuteDurationMs { get; set; }
+        public double DurationMs { get; set; }
 
         public string DataBaseName { get; set; }
     }

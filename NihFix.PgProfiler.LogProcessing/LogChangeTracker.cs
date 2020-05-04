@@ -26,7 +26,6 @@ namespace NihFix.PgProfiler.LogProcessing
         /// </summary>
         public event EventHandler<OnLogAddEventArgs> OnLogChange;
 
-        private LogInterpreter _logInterpreter;
 
         /// <summary>
         /// Ctr.
@@ -34,7 +33,6 @@ namespace NihFix.PgProfiler.LogProcessing
         /// <param name="logFolderPath">Path to folder with log files.</param>
         public LogChangeTracker(string logFolderPath)
         {
-            _logInterpreter=new LogInterpreter(new LogInterpreterConfig());
             _logFolderPath = logFolderPath;
             _fileSystemWatcher = new FileSystemWatcher();
             _fileSystemWatcher.Path = logFolderPath;
